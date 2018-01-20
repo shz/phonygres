@@ -1,0 +1,3 @@
+[submodule "deps/libpg_query"]
+	path = deps/libpg_query
+	url = https://github.com/lfittl/libpg_query.git
