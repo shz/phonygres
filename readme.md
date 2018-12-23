@@ -38,6 +38,10 @@ pip install -r requirements.txt
 ./setup.py test
 ```
 
+### TODOs
+
+ * `sqlparse` has a fairly robust token/statement iteration system, use it instead https://github.com/andialbrecht/sqlparse/blob/master/sqlparse/sql.py
+
 ## License
 
 [Unlicense](http://unlicense.org/), so basically public domain.  See

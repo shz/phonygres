@@ -2,6 +2,7 @@ from typing import Optional, Iterator
 
 class Token:
     is_whitespace: bool
+    value: str
 
     def match(self, ttype: str, values: str) -> bool: ...
 
