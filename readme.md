@@ -29,6 +29,7 @@ here, so here are the shortcuts taken to get things manageable:
 ## Developing
 
 ```bash
+# Setup
 python -m venv .venv # It's 2018, use a virtual env
 . .venv/scripts/activate # Modify per your shell's flavor
 pip install -r requirements.txt

@@ -1,8 +1,7 @@
-from typing import Optional, Tuple, List, Iterator, Dict
+from typing import Optional, Tuple, List
 
 from sqlparse import parse as sql_parse
-from sqlparse.sql import Statement as ParseStatement, Token
-from sqlparse.tokens import Keyword
+from sqlparse.sql import Statement as ParseStatement
 
 from .util import StatementIter
 from .parse_create import parse_create
@@ -15,23 +14,22 @@ def parse_sql(sql: str) -> List[Statement]:
     statements: List[Statement] = []
 
     for statement in parse_ast:
-        iter = StatementIter(statement)
+        it = StatementIter(statement)
 
         # statement._pprint_tree()
 
-        parsed = parse_statement(iter)
+        parsed = parse_statement(it)
         if parsed is not None:
             statements.append(parsed)
 
     return statements
 
-def parse_statement(iter: StatementIter) -> Optional[Statement]:
-    t = iter.next_opt()
+def parse_statement(it: StatementIter) -> Optional[Statement]:
+    t = it.next_opt()
     if t is None:
         return None
 
     if t == 'CREATE':
-        return parse_create(iter)
+        return parse_create(it)
     else:
         raise PhonygresError('42601', f'syntax error at or near "{t}"')
-

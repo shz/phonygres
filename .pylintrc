@@ -1,0 +1,20 @@
+[MESSAGES CONTROL]
+msg-template={path}:{line}:{column}: {msg_id}: {msg} ({symbol})
+disable=
+    missing-docstring,
+    fixme,
+    too-few-public-methods,
+    unused-argument,
+    no-else-return,
+    too-many-branches,
+    no-self-use,
+
+[REPORTS]
+output-format=text
+files-output=no
+reports=no
+score=no
+
+[BASIC]
+variable-rgx=[a-z_][a-z0-9_]{0,30}$
+argument-rgx=[a-z_][a-z0-9_]{0,30}$

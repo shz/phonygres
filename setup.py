@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
-import os
 import sys
 import subprocess
-from distutils.cmd import Command
-from distutils.core import setup
+from typing import List, Any
+from setuptools import Command, setup
 
 class TestCommand(Command):
     '''
     Runs unit tests, via pytest.
     '''
-    user_options = []
+    user_options: List[Any] = []
 
     def initialize_options(self):
         pass
@@ -25,7 +24,7 @@ class LintCommand(Command):
     '''
     Runs linting.
     '''
-    user_options = []
+    user_options: List[Any] = []
 
     def initialize_options(self):
         pass
@@ -35,7 +34,7 @@ class LintCommand(Command):
 
     def run(self):
         commands = (
-            # [sys.executable, '-m', 'pylint'],
+            [sys.executable, '-m', 'pylint', 'phonygres', 'setup.py'],
             [sys.executable, '-m', 'mypy', 'phonygres'],
         )
         for cmd in commands:
@@ -52,6 +51,9 @@ setup(
     author_email='lylepstein@gmail.com',
     url='https://github.com/shz/phonygres',
     packages=['phonygres'],
+    install_requires=[
+        'sqlparse==0.2.4'
+    ],
     cmdclass={
         'lint': LintCommand,
         'test': TestCommand,
