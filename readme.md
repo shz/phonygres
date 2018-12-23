@@ -1,5 +1,7 @@
 # Phonygres
 
+[![Build Status](https://travis-ci.org/shz/phonygres.svg?branch=master)](https://travis-ci.org/shz/phonygres)
+
 A Python3 implementation of Postgres.
 
 ## My god man, why?
