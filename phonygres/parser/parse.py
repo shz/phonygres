@@ -16,7 +16,7 @@ def parse_sql(sql: str) -> List[Statement]:
     for statement in parse_ast:
         it = StatementIter(statement)
 
-        # statement._pprint_tree()
+        statement._pprint_tree()
 
         parsed = parse_statement(it)
         if parsed is not None:

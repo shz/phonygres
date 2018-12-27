@@ -1,7 +1,8 @@
-from typing import Optional, Iterator
+from typing import Optional, Iterator, Any
 
 class Token:
     is_whitespace: bool
+    ttype: Any
     value: str
 
     def match(self, ttype: str, values: str) -> bool: ...
