@@ -1,4 +1,6 @@
-from typing import List
+from typing import cast, List
+
+from sqlparse import tokens, sql
 
 from .util import StatementIter
 from ..errors import PhonygresError
@@ -10,93 +12,98 @@ def parse_create(it: StatementIter) -> CreateStatement:
 
     # Postgres has a couple possible flags for creating things that
     # we're basically just going to ignore.
-    while t in ['GLOBAL', 'LOCAL', 'TEMPORARY', 'TEMP', 'UNLOGGED']:
+    while t.normalized in ['GLOBAL', 'LOCAL', 'TEMPORARY', 'TEMP', 'UNLOGGED']:
         t = it.next()
 
-    if t == 'ACCESS':
+    tv = t.normalized
+    if tv == 'ACCESS':
         it.assert_next('METHOD')
         return None
-    elif t == 'AGGREGATE':
+    elif tv == 'AGGREGATE':
         raise NotImplementedError()
-    elif t == 'CAST':
+    elif tv == 'CAST':
         raise NotImplementedError()
-    elif t == 'COLLATION':
+    elif tv == 'COLLATION':
         raise NotImplementedError()
-    elif t == 'CONVERSION':
+    elif tv == 'CONVERSION':
         raise NotImplementedError()
-    elif t == 'DATABASE':
+    elif tv == 'DATABASE':
         raise NotImplementedError()
-    elif t == 'DOMAIN':
+    elif tv == 'DOMAIN':
         raise NotImplementedError()
-    elif t == 'EVENT':
+    elif tv == 'EVENT':
         it.assert_next('TRIGGER')
         raise NotImplementedError()
-    elif t == 'EXTENSION':
+    elif tv == 'EXTENSION':
         raise NotImplementedError()
-    elif t == 'FOREIGN':
+    elif tv == 'FOREIGN':
         raise NotImplementedError()
-    elif t == 'FUNCTION':
+    elif tv == 'FUNCTION':
         raise NotImplementedError()
-    elif t == 'GROUP':
+    elif tv == 'GROUP':
         raise NotImplementedError()
-    elif t == 'INDEX':
+    elif tv == 'INDEX':
         raise NotImplementedError()
-    elif t == 'LANGUAGE':
+    elif tv == 'LANGUAGE':
         raise NotImplementedError()
-    elif t == 'MATERIALIZED':
+    elif tv == 'MATERIALIZED':
         it.assert_next('VIEW')
         raise NotImplementedError()
-    elif t == 'OPERATOR':
+    elif tv == 'OPERATOR':
         raise NotImplementedError()
-    elif t == 'POLICY':
+    elif tv == 'POLICY':
         raise NotImplementedError()
-    elif t == 'PROCEDURE':
+    elif tv == 'PROCEDURE':
         raise NotImplementedError()
-    elif t == 'PUBLICATION':
+    elif tv == 'PUBLICATION':
         raise NotImplementedError()
-    elif t == 'ROLE':
+    elif tv == 'ROLE':
         raise NotImplementedError()
-    elif t == 'RULE':
+    elif tv == 'RULE':
         raise NotImplementedError()
-    elif t == 'SCHEMA':
+    elif tv == 'SCHEMA':
         raise NotImplementedError()
-    elif t == 'SEQUENCE':
+    elif tv == 'SEQUENCE':
         raise NotImplementedError()
-    elif t == 'SERVER':
+    elif tv == 'SERVER':
         raise NotImplementedError()
-    elif t == 'STATISTICS':
+    elif tv == 'STATISTICS':
         raise NotImplementedError()
-    elif t == 'SUBSCRIPTION':
+    elif tv == 'SUBSCRIPTION':
         raise NotImplementedError()
-    elif t == 'TABLE':
+    elif tv == 'TABLE':
         return parse_create_table(it)
-    elif t == 'TABLESPACE':
+    elif tv == 'TABLESPACE':
         raise NotImplementedError()
-    elif t == 'TEXT':
+    elif tv == 'TEXT':
         raise NotImplementedError()
-    elif t == 'TRANSFORM':
+    elif tv == 'TRANSFORM':
         raise NotImplementedError()
-    elif t == 'TRIGGER':
+    elif tv == 'TRIGGER':
         raise NotImplementedError()
-    elif t == 'TYPE':
+    elif tv == 'TYPE':
         raise NotImplementedError()
-    elif t == 'USER':
+    elif tv == 'USER':
         raise NotImplementedError()
-    elif t == 'VIEW':
+    elif tv == 'VIEW':
         raise NotImplementedError()
     else:
-        raise PhonygresError('42601', f'syntax error at or near "{t}"')
+        raise PhonygresError('42601', f'syntax error at or near "{t.value}"')
 
 def parse_create_table(it: StatementIter) -> CreateTable:
     if_not_exists = False
 
     name = it.next()
-    if name == 'IF NOT EXISTS':
+    if name.ttype == tokens.Keyword:
+        if name.normalized != 'IF':
+            raise PhonygresError('42601', f'syntax error at or near "{name.value}"')
+        it.assert_next('NOT')
+        it.assert_next('EXISTS')
         if_not_exists = True
         name = it.next()
 
     statement = CreateTable(
-        name=name,
+        name=name.value,
         if_not_exists=if_not_exists,
         columns=parse_columns(it)
     )
@@ -104,4 +111,43 @@ def parse_create_table(it: StatementIter) -> CreateTable:
     return statement
 
 def parse_columns(it: StatementIter) -> List[Column]:
-    return []
+    # Column definitions always come wrapped in parenthesis
+    root = it.next()
+    if not isinstance(root, sql.Parenthesis):
+        raise PhonygresError('42601', f'syntax error at or near "{root.value}"')
+
+    columns = []
+    sub_it = StatementIter(cast(sql.Statement, root))
+
+    while True:
+        # Parse until we run out
+        name = sub_it.next_opt()
+        if name is None:
+            break
+
+        # Table constraints follow the regular list of columns, parse them
+        # separately and then finish.
+        if not isinstance(name, sql.Identifier):
+            break # TODO
+
+        # Parse the data type
+        data_type = []
+        while sub_it.has_next() and sub_it.peek().ttype is tokens.Name.Builtin:
+            data_type.append(sub_it.next())
+
+        # Parse the optional collation flag
+        collate = None
+        if sub_it.has_next() and sub_it.peek().normalized == 'COLLATE':
+            sub_it.next() # Consume peeked value
+            collate = sub_it.next()
+
+        # TODO - parse column constraints
+
+        # Assemble the column entry
+        columns.append(Column(
+            name.value,
+            ' '.join([t.normalized for t in data_type]),
+            collate.normalized if collate is not None else None
+        ))
+
+    return columns

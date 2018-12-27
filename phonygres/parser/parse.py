@@ -29,7 +29,7 @@ def parse_statement(it: StatementIter) -> Optional[Statement]:
     if t is None:
         return None
 
-    if t == 'CREATE':
+    if t.normalized == 'CREATE':
         return parse_create(it)
     else:
         raise PhonygresError('42601', f'syntax error at or near "{t}"')

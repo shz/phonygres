@@ -5,7 +5,8 @@ Error = 'Error'
 Other = 'Other'
 
 Keyword = 'Keyword'
-Name = 'Name'
+class Name:
+    Builtin = 'Builtin'
 Literal = 'Literal'
 String = 'String'
 Number = 'Number'

@@ -8,6 +8,8 @@ disable=
     no-else-return,
     too-many-branches,
     no-self-use,
+    protected-access,
+    too-many-statements,
 
 [REPORTS]
 output-format=text
