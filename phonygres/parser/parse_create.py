@@ -29,29 +29,79 @@ def parse_create(it: StatementIter) -> CreateStatement:
     elif t == 'DOMAIN':
         raise NotImplementedError()
     elif t == 'EVENT':
+        it.assert_next('TRIGGER')
         raise NotImplementedError()
     elif t == 'EXTENSION':
         raise NotImplementedError()
     elif t == 'FOREIGN':
         raise NotImplementedError()
+    elif t == 'FUNCTION':
+        raise NotImplementedError()
+    elif t == 'GROUP':
+        raise NotImplementedError()
+    elif t == 'INDEX':
+        raise NotImplementedError()
+    elif t == 'LANGUAGE':
+        raise NotImplementedError()
+    elif t == 'MATERIALIZED':
+        it.assert_next('VIEW')
+        raise NotImplementedError()
+    elif t == 'OPERATOR':
+        raise NotImplementedError()
+    elif t == 'POLICY':
+        raise NotImplementedError()
+    elif t == 'PROCEDURE':
+        raise NotImplementedError()
+    elif t == 'PUBLICATION':
+        raise NotImplementedError()
+    elif t == 'ROLE':
+        raise NotImplementedError()
+    elif t == 'RULE':
+        raise NotImplementedError()
+    elif t == 'SCHEMA':
+        raise NotImplementedError()
+    elif t == 'SEQUENCE':
+        raise NotImplementedError()
+    elif t == 'SERVER':
+        raise NotImplementedError()
+    elif t == 'STATISTICS':
+        raise NotImplementedError()
+    elif t == 'SUBSCRIPTION':
+        raise NotImplementedError()
     elif t == 'TABLE':
         return parse_create_table(it)
+    elif t == 'TABLESPACE':
+        raise NotImplementedError()
+    elif t == 'TEXT':
+        raise NotImplementedError()
+    elif t == 'TRANSFORM':
+        raise NotImplementedError()
+    elif t == 'TRIGGER':
+        raise NotImplementedError()
+    elif t == 'TYPE':
+        raise NotImplementedError()
+    elif t == 'USER':
+        raise NotImplementedError()
+    elif t == 'VIEW':
+        raise NotImplementedError()
     else:
         raise PhonygresError('42601', f'syntax error at or near "{t}"')
 
 def parse_create_table(it: StatementIter) -> CreateTable:
     if_not_exists = False
-    columns: List[Column] = []
 
-    t = it.next()
-    if t == 'IF NOT EXISTS':
+    name = it.next()
+    if name == 'IF NOT EXISTS':
         if_not_exists = True
-        t = it.next()
+        name = it.next()
 
     statement = CreateTable(
-        name=t,
+        name=name,
         if_not_exists=if_not_exists,
-        columns=columns
+        columns=parse_columns(it)
     )
 
     return statement
+
+def parse_columns(it: StatementIter) -> List[Column]:
+    return []

@@ -14,4 +14,4 @@ class Database:
         for statement in parse_sql(sql):
             execute(statement, None) # TODO
 
-        # raise Exception('no')
+        raise Exception('no')

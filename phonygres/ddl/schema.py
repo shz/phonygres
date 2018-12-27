@@ -13,6 +13,12 @@ class Schema:
 
     def add_table(self, table: Table) -> None:
         if table.name in self.tables:
-            raise PhonygresError('42P07', f'relation {table.name} already exists')
+            raise PhonygresError('42P07', f'relation "{table.name}" already exists')
 
         self.tables[table.name] = table
+
+    def drop_table(self, table: Table) -> None:
+        if table.name not in self.tables:
+            raise PhonygresError('42P01', f'relation "{table.name}" does not exist')
+
+        del self.tables[table.name]
