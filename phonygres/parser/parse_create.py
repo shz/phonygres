@@ -1,4 +1,4 @@
-from typing import cast, List
+from typing import cast, List, Any
 
 from sqlparse import tokens, sql
 
@@ -6,6 +6,7 @@ from .util import StatementIter
 from ..errors import PhonygresError
 from ..ast import CreateStatement, CreateTable
 from ..ddl import Column
+from ..ddl.data_types import aliases, DataType
 
 def parse_create(it: StatementIter) -> CreateStatement:
     t = it.next()
@@ -131,9 +132,15 @@ def parse_columns(it: StatementIter) -> List[Column]:
             break # TODO
 
         # Parse the data type
-        data_type = []
+        data_type_parts: List[sql.Token] = []
+        args: List[Any] = [] # TODO - parse these out
         while sub_it.has_next() and sub_it.peek().ttype is tokens.Name.Builtin:
-            data_type.append(sub_it.next())
+            data_type_parts.append(sub_it.next())
+        data_type_str = ' '.join([t.normalized for t in data_type_parts]).lower()
+        # See: https://github.com/python/mypy/issues/4997
+        data_type: DataType = aliases.get(data_type_str)(*args) # type: ignore
+        if data_type is None:
+            raise PhonygresError('42704', f'type "{data_type_str}" does not exist')
 
         # Parse the optional collation flag
         collate = None
@@ -146,7 +153,7 @@ def parse_columns(it: StatementIter) -> List[Column]:
         # Assemble the column entry
         columns.append(Column(
             name.value,
-            ' '.join([t.normalized for t in data_type]),
+            data_type,
             collate.normalized if collate is not None else None
         ))
 

@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 ### TODOs
 
- * `sqlparse` has a fairly robust token/statement iteration system, use it instead https://github.com/andialbrecht/sqlparse/blob/master/sqlparse/sql.py
+
 
 ## License
 

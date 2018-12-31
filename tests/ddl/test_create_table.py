@@ -1,12 +1,14 @@
-def test_empty_create(db):
+from phonygres import Database
+
+def test_empty_create(db: Database):
     db.execute('''
     CREATE TABLE empty();
     ''')
 
-def test_basic_create(db):
+def test_basic_create(db: Database):
     db.execute('''
     CREATE TABLE basic(
-        id SERIAL,
+        num INT,
         field CHARACTER VARYING
     );
     ''')
