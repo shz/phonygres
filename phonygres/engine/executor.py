@@ -1,4 +1,19 @@
-from ..ast import Statement
+# pylint: disable=function-redefined, wildcard-import, unused-wildcard-import
 
-def execute(statement: Statement, target):
-    pass
+from typing import Dict, Type, Any, Callable
+
+from ..ast import *
+from ..transaction import Transaction
+from ..database import Database
+
+visitors: Dict[Type, Callable[[Transaction, Statement, Database], Any]] = {
+    # TX
+    StartTransaction: lambda tx, st, db: None,
+    Commit: lambda tx, st, db: None,
+
+    # DDL
+    CreateTable: lambda tx, st, db: None,
+}
+
+def execute(tx: Transaction, statement: Statement, target: Database) -> Any:
+    return visitors[statement.__class__](tx, statement, target)

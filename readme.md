@@ -17,8 +17,7 @@ here, so here are the shortcuts taken to get things manageable:
  * It's all in-memory
  * Concurrent transaction support is... limited
  * Indexes are no-ops
- * There's one execution strategy: loop over every record in each
-   queries table
+ * There's one execution strategy: full table scans
 
 ## Installing
 
@@ -41,7 +40,8 @@ pip install -r requirements.txt
 
 ### TODOs
 
-
+ * Table constraints
+ * Column constraints
 
 ## License
 
